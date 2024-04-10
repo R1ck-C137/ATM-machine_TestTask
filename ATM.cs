@@ -9,10 +9,16 @@ namespace ATM_machine_TestTask
     public class ATM
     {
         private Dictionary<int, int> banknotes = new Dictionary<int, int>();
+        string banknotesFile = "../../../banknotes.txt";
 
-        public ATM(string filename) 
+        public ATM() 
         {
-            banknotes = LoadBanknotes(filename);
+            banknotes = LoadBanknotes(banknotesFile);
+        }
+
+        public ATM(string banknotesFile)
+        {
+            banknotes = LoadBanknotes(banknotesFile);
         }
 
         private static Dictionary<int, int> LoadBanknotes(string filename)

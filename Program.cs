@@ -4,8 +4,7 @@
     {
         static void Main(string[] args)
         {
-            var banknotesFile = "../../../banknotes.txt";
-            var atm = new ATM(banknotesFile);
+            var atm = new ATM();
 
             while (true)
             {
