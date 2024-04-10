@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ATM_machine_TestTask
 {
-    class ATM
+    public class ATM
     {
         private Dictionary<int, int> banknotes = new Dictionary<int, int>();
 
