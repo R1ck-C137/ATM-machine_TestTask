@@ -9,9 +9,9 @@ namespace ATM_machine_TestTask
     public class ATM
     {
         private Dictionary<int, int> banknotes = new Dictionary<int, int>();
-        string banknotesFile = "../../../banknotes.txt";
+        private string banknotesFile = "../../../banknotes.txt";
 
-        public ATM() 
+        public ATM()
         {
             banknotes = LoadBanknotes(banknotesFile);
         }
@@ -30,27 +30,46 @@ namespace ATM_machine_TestTask
 
         public Dictionary<int, int>? WithdrawAmount(int remainingAmount)
         {
-            var withdrawal = new Dictionary<int, int>();
-            var availableBanknotes = banknotes.OrderByDescending(kv => kv.Key);
+            var result = TryWithdrawAmount(remainingAmount, banknotes);
 
-            foreach (var (nominal, count) in availableBanknotes)
+            if (result != null && result.Value.Item1 != null && result.Value.Item2 != null)
             {
-                var withdrawnCount = Math.Min(remainingAmount / nominal, count);
-                if (withdrawnCount > 0)
-                {
-                    withdrawal[nominal] = withdrawnCount;
-                    remainingAmount -= withdrawnCount * nominal;
-                }
-            }
-
-            if (remainingAmount == 0)
-            {
-                foreach (var (nominal, count) in withdrawal)
-                    banknotes[nominal] -= count;
-                return withdrawal;
+                banknotes = result.Value.Item1;
+                return result.Value.Item2;
             }
             else
                 return null;
+        }
+
+        private (Dictionary<int, int>, Dictionary<int, int>)? TryWithdrawAmount(int remainingAmount, Dictionary<int, int> banknotes, Dictionary<int, int>? withdrawal = null)
+        {
+            if(withdrawal == null)
+                withdrawal = new Dictionary<int, int>();
+
+            if (remainingAmount == 0)
+                return (banknotes, withdrawal);
+
+            foreach (var (nominal, count) in banknotes.OrderByDescending(kv => kv.Key))
+            {
+                if (count > 0 && nominal <= remainingAmount)
+                {
+                    var newListOfBanknotes = new Dictionary<int, int>(banknotes);
+                    newListOfBanknotes[nominal]--;
+                    var newWithdrawal = new Dictionary<int, int>(withdrawal);
+
+                    if (newWithdrawal.ContainsKey(nominal))
+                        newWithdrawal[nominal]++;
+                    else
+                        newWithdrawal.Add(nominal, 1);
+
+                    var result = TryWithdrawAmount(remainingAmount - nominal, newListOfBanknotes, newWithdrawal);
+
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            return null;
         }
     }
 }
