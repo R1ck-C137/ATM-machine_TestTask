@@ -48,28 +48,30 @@ namespace ATM_machine_TestTask
 
             if (remainingAmount == 0)
                 return (banknotes, withdrawal);
-
             foreach (var (nominal, count) in banknotes.OrderByDescending(kv => kv.Key))
             {
                 if (count > 0 && nominal <= remainingAmount)
                 {
-                    var newListOfBanknotes = new Dictionary<int, int>(banknotes);
-                    newListOfBanknotes[nominal]--;
-                    var newWithdrawal = new Dictionary<int, int>(withdrawal);
+                    var maxCount = Math.Min(remainingAmount / nominal, count);
+                    for (int withdrawnCount = maxCount; withdrawnCount > 0; withdrawnCount--)
+                    {
+                        var newRemainingAmount = remainingAmount - withdrawnCount * nominal;
+                        var newBanknotes = new Dictionary<int, int>(banknotes);
+                        newBanknotes[nominal] -= withdrawnCount;
+                        var newWithdrawal = new Dictionary<int, int>(withdrawal);
 
-                    if (newWithdrawal.ContainsKey(nominal))
-                        newWithdrawal[nominal]++;
-                    else
-                        newWithdrawal.Add(nominal, 1);
+                        if (newWithdrawal.ContainsKey(nominal))
+                            newWithdrawal[nominal] += withdrawnCount;
+                        else
+                            newWithdrawal.Add(nominal, withdrawnCount);
 
-                    var result = TryWithdrawAmount(remainingAmount - nominal, newListOfBanknotes, newWithdrawal);
-
-                    if (result != null)
-                        return result;
+                        var result = TryWithdrawAmount(newRemainingAmount, newBanknotes, newWithdrawal);
+                        if (result != null)
+                            return result;
+                    }
                 }
             }
-
-            return null;
+                return null;
         }
     }
 }
